@@ -38,7 +38,6 @@ const guestSchema = new mongoose.Schema({
     },
     guestInvitation: {
         type: Boolean,
-        default: false,
         required: true,
     },
     guestWouldAccept: {
@@ -122,6 +121,12 @@ const guestSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true
+    },
+    guestFoodType:{
+        type: String,
+        required: false,
+        enum: ["Pollo", "Cerdo"],
+        default: "Pollo"
     }
 })
 
