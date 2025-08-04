@@ -17,7 +17,8 @@ const developmentCorsOptions = {
             'http://127.0.0.1:3001',
             'http://127.0.0.1:5173',
             'http://127.0.0.1:8080',
-            'http://127.0.0.1:4200'
+            'http://127.0.0.1:4200',
+            'https://invitation-backend-cqj7.onrender.com'
         ];
         
         if (allowedOrigins.indexOf(origin) !== -1) {
