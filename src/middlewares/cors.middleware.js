@@ -13,12 +13,15 @@ const developmentCorsOptions = {
             'http://localhost:5174',     // Vite default
             'http://localhost:8080',     // Vue default
             'http://localhost:4200',     // Angular default
+            'http://localhost:1000',     // Render.com puerto 1000
             'http://127.0.0.1:3000',
             'http://127.0.0.1:3001',
             'http://127.0.0.1:5173',
             'http://127.0.0.1:8080',
             'http://127.0.0.1:4200',
-            'https://invitation-backend-cqj7.onrender.com'
+            'http://127.0.0.1:1000',     // Render.com puerto 1000
+            'https://invitation-backend-cqj7.onrender.com',
+            'https://invitation-backend-cqj7.onrender.com:1000'  // Render.com con puerto específico
         ];
         
         if (allowedOrigins.indexOf(origin) !== -1) {
