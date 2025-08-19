@@ -7,9 +7,7 @@ const createGuest = async (guest) => {
 }
 
 const getGuest = async (guestId) => {
-    console.log(guestId);
     const guest = await Guest.findOne({ guestInvitationId: guestId });
-    console.log(guest);
     return guest;
 }
 

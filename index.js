@@ -9,11 +9,9 @@ const databaseUrl = `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}/${DB
 mongoose
 .connect(databaseUrl)
 .then(() => {
-    console.log('Connected to MongoDB');
     app.listen(port, () => {
-        console.log(`Server is running on port ${port}`);
     });
 })
 .catch((error) => {
-    console.log('Error connecting to MongoDB', error);
+    console.error('Error connecting to MongoDB', error);
 });
