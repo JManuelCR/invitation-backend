@@ -141,6 +141,16 @@ const guestSchema = new mongoose.Schema({
         required: false,
         min: 0,
         default: 0
+    },
+    guestInvitationUrl: {
+        type: String,
+        required: false,
+        default: null
+    },
+    guestQRCodeUrl: {
+        type: String,
+        required: false,
+        default: null
     }
 })
 
