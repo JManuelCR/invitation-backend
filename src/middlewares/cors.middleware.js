@@ -47,7 +47,10 @@ const developmentCorsOptions = {
 
 // Configuración de CORS para producción (más restrictiva)
 const productionCorsOptions = {
-    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [],
+    origin: process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+        .map(origin => origin.trim().replace(/\/$/, ""))
+    : [],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
