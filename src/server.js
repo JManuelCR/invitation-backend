@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const corsMiddleware = require("./middlewares/cors.middleware");
 const app = express();
