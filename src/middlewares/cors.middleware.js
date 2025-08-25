@@ -19,7 +19,8 @@ const developmentCorsOptions = {
             'http://127.0.0.1:8080',
             'http://127.0.0.1:4200',
             'http://127.0.0.1:1000',     
-            'https://invitation-nine-tan.vercel.app' // vercel
+            'https://invitation-nine-tan.vercel.app', // vercel
+            'https://guest-control-dashboard.vercel.app/',
         ];
         
         if (allowedOrigins.indexOf(origin) !== -1) {
