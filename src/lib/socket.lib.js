@@ -17,23 +17,19 @@ const initializeSocket = (server) => {
 
   // Manejar conexiones de clientes
   io.on('connection', (socket) => {
-    console.log(`Cliente conectado: ${socket.id}`);
 
     // Unirse a una sala específica (por ejemplo, para un evento de boda)
     socket.on('join-wedding', (weddingId) => {
       socket.join(`wedding-${weddingId}`);
-      console.log(`Cliente ${socket.id} se unió a la boda ${weddingId}`);
     });
 
     // Unirse a una sala de invitados específicos
     socket.on('join-guest-room', (guestId) => {
       socket.join(`guest-${guestId}`);
-      console.log(`Cliente ${socket.id} se unió a la sala del invitado ${guestId}`);
     });
 
     // Desconexión
     socket.on('disconnect', () => {
-      console.log(`Cliente desconectado: ${socket.id}`);
     });
   });
 

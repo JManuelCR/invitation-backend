@@ -19,11 +19,9 @@ class UserSocketManager {
     this.socket = io('http://localhost:3000');
     
     this.socket.on('connect', () => {
-      console.log('✅ Conectado al servidor WebSocket');
     });
 
     this.socket.on('disconnect', () => {
-      console.log('❌ Desconectado del servidor WebSocket');
     });
 
     // Configurar listeners para eventos de usuarios
@@ -34,7 +32,6 @@ class UserSocketManager {
   setupUserListeners() {
     // Cuando se crea un nuevo usuario
     this.socket.on('user-created', (data) => {
-      console.log('🆕 Nuevo usuario creado:', data);
       this.users.push(data.user);
       
       if (this.callbacks.onUserCreated) {
@@ -44,7 +41,6 @@ class UserSocketManager {
 
     // Cuando se actualiza un usuario
     this.socket.on('user-updated', (data) => {
-      console.log('✏️ Usuario actualizado:', data);
       
       const index = this.users.findIndex(user => user._id === data.userId);
       if (index !== -1) {
@@ -58,7 +54,6 @@ class UserSocketManager {
 
     // Cuando se elimina un usuario
     this.socket.on('user-deleted', (data) => {
-      console.log('🗑️ Usuario eliminado:', data);
       
       this.users = this.users.filter(user => user._id !== data.userId);
       
@@ -69,7 +64,6 @@ class UserSocketManager {
 
     // Cuando se obtienen todos los usuarios
     this.socket.on('users-fetched', (data) => {
-      console.log(`📋 Se obtuvieron ${data.count} usuarios`);
       
       if (this.callbacks.onUsersFetched) {
         this.callbacks.onUsersFetched(data.count);
@@ -81,7 +75,6 @@ class UserSocketManager {
   joinUserRoom(userId) {
     if (this.socket) {
       this.socket.emit('join-user-room', userId);
-      console.log(`🔗 Unido a la sala del usuario: ${userId}`);
     }
   }
 
@@ -89,7 +82,6 @@ class UserSocketManager {
   joinGuestRoom(guestId) {
     if (this.socket) {
       this.socket.emit('join-guest-room', guestId);
-      console.log(`🔗 Unido a la sala del invitado: ${guestId}`);
     }
   }
 
@@ -97,7 +89,6 @@ class UserSocketManager {
   joinWedding(weddingId) {
     if (this.socket) {
       this.socket.emit('join-wedding', weddingId);
-      console.log(`🔗 Unido a la boda: ${weddingId}`);
     }
   }
 
@@ -160,7 +151,6 @@ export function useUserSocket() {
     });
 
     manager.onUsersFetched((count) => {
-      console.log(`Lista de usuarios actualizada: ${count} usuarios`);
     });
 
     // Conectar al WebSocket
@@ -208,19 +198,16 @@ export function initUserSocket() {
   
   // Configurar callbacks
   manager.onUserCreated((user) => {
-    console.log('Nuevo usuario en el sistema:', user.name);
     // Aquí puedes actualizar tu UI
     updateUserList();
   });
 
   manager.onUserUpdated((user, userId) => {
-    console.log('Usuario actualizado:', user.name);
     // Aquí puedes actualizar tu UI
     updateUserInList(user);
   });
 
   manager.onUserDeleted((userId) => {
-    console.log('Usuario eliminado del sistema');
     // Aquí puedes actualizar tu UI
     removeUserFromList(userId);
   });
@@ -234,19 +221,16 @@ export function initUserSocket() {
 // Función para actualizar la lista de usuarios en el DOM
 function updateUserList() {
   // Implementa la lógica para actualizar tu UI
-  console.log('Actualizando lista de usuarios...');
 }
 
 // Función para actualizar un usuario específico en la lista
 function updateUserInList(user) {
   // Implementa la lógica para actualizar un usuario específico
-  console.log('Actualizando usuario:', user.name);
 }
 
 // Función para remover un usuario de la lista
 function removeUserFromList(userId) {
   // Implementa la lógica para remover un usuario
-  console.log('Removiendo usuario:', userId);
 }
 
 export default UserSocketManager; 

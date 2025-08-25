@@ -4,18 +4,19 @@ const jwt = require("../lib/jwt.lib");
 const User = require("../models/users.model");
 
 const login = async (email, textPassword) => {
-    console.log(payload, process.env.SECRET_KEY)
   const user = await User.findOne({ email });
   if (!user) throw createError(401, "Invalid data");
   const isValidPassword = await bcrypt.compare(textPassword, user.password);
   if (!isValidPassword) throw createError(401, "Invalid data");
+  
   const payload = {
-      email: user.email,
-      id: user._id,
-      userType: user.userType,
-      name: user.name,
-    };
-    console.log(payload, process.env.SECRET_KEY)
+    email: user.email,
+    id: user._id,
+    userType: user.userType,
+    name: user.name,
+  };
+  
+  
   const token = jwt.sign(payload);
   return token;
 };

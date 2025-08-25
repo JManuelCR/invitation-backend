@@ -4,14 +4,23 @@ const express = require('express');
 const http = require('http');
 const app = require('./src/server');
 const { initializeSocket } = require('./src/lib/socket.lib');
+const { env, validateEnv, showEnv } = require('./src/config/env');
 
-const { DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME } = process.env;
-const port = process.env.PORT || 3000;
-const databaseUrl = `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@${DB_HOST}/${DB_NAME}`;
+// Validar configuración antes de iniciar
+if (!validateEnv()) {
+  console.error("❌ No se puede iniciar el servidor con configuración inválida");
+  process.exit(1);
+}
+
+// Mostrar configuración
+showEnv();
+
+const databaseUrl = `mongodb+srv://${env.DB_USERNAME}:${env.DB_PASSWORD}@${env.DB_HOST}/${env.DB_NAME}`;
 
 mongoose
 .connect(databaseUrl)
 .then(() => {
+    
     // Crear servidor HTTP
     const server = http.createServer(app);
     
@@ -19,11 +28,10 @@ mongoose
     initializeSocket(server);
     
     // Iniciar servidor
-    server.listen(port, () => {
-        console.log(`Servidor corriendo en puerto ${port}`);
-        console.log(`WebSocket disponible en ws://localhost:${port}`);
+    server.listen(env.PORT, () => {
     });
 })
 .catch((error) => {
-    console.error('Error connecting to MongoDB', error);
+    console.error('❌ Error connecting to MongoDB:', error);
+    process.exit(1);
 });

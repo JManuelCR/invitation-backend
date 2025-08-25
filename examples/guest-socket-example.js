@@ -16,11 +16,9 @@ class GuestSocketManager {
     this.socket = io('http://localhost:3000');
     
     this.socket.on('connect', () => {
-      console.log('✅ Conectado al servidor WebSocket');
     });
 
     this.socket.on('disconnect', () => {
-      console.log('❌ Desconectado del servidor WebSocket');
     });
 
     // Configurar listener SOLO para cuando se obtienen todos los invitados
@@ -31,8 +29,6 @@ class GuestSocketManager {
   setupGuestListener() {
     // SOLO este evento se emite desde GET /guests
     this.socket.on('guests-fetched', (data) => {
-      console.log(`📋 Invitados obtenidos: ${data.count} invitados`);
-      console.log('Timestamp:', data.timestamp);
       
       if (this.callbacks.onGuestsFetched) {
         this.callbacks.onGuestsFetched(data);
@@ -67,7 +63,6 @@ export function useGuestSocket() {
     manager.onGuestsFetched((data) => {
       setGuestsCount(data.count);
       setLastFetchTime(data.timestamp);
-      console.log(`Se obtuvieron ${data.count} invitados en tiempo real`);
     });
 
     // Conectar al WebSocket
@@ -105,10 +100,7 @@ export function initGuestSocket() {
   const manager = new GuestSocketManager();
   
   // Configurar callback para cuando se obtienen los invitados
-  manager.onGuestsFetched((data) => {
-    console.log('🎉 Evento emitido desde GET /guests!');
-    console.log(`Se obtuvieron ${data.count} invitados`);
-    
+  manager.onGuestsFetched((data) => { 
     // Aquí puedes actualizar tu UI
     updateGuestCount(data.count);
     updateLastFetchTime(data.timestamp);
