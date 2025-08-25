@@ -2,13 +2,29 @@ const express = require("express");
 const router = express.Router();
 const { createGuest, getGuest, getAllGuests, updateGuest, deleteGuest } = require("../usesCases/guest.usecase");
 const { findOneAndDelete } = require("../models/guest.model");
+const { auth } = require("../middlewares/auth.midleware");
+const { emitToAll } = require("../lib/socket.lib");
 
-router.get("/guests", async (req, res) => {
-    const guests = await getAllGuests();
-    res.status(200).json(guests);
+// PROTECTED ENDPOINT - Requires JWT authentication
+router.get("/guests", auth, async (req, res) => {
+    try {
+        const guests = await getAllGuests();
+        
+        // Emitir evento de socket SOLO cuando se obtienen todos los invitados
+        emitToAll('guests-fetched', {
+            action: 'fetched',
+            count: guests.length,
+            timestamp: new Date().toISOString()
+        });
+        
+        res.status(200).json(guests);
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching guests", error: error.message });
+    }
 });
 
-router.post("/", async (req, res) => {
+// PROTECTED ENDPOINT - Requires JWT authentication
+router.post("/", auth, async (req, res) => {
     const guest = req.body;
     const newGuest = await createGuest(guest);
     if (!newGuest) {
@@ -17,7 +33,8 @@ router.post("/", async (req, res) => {
     res.status(201).json(newGuest);
 }); 
 
-router.get("/:guestId", async (req, res) => {
+// PROTECTED ENDPOINT - Requires JWT authentication
+router.get("/:guestId", auth, async (req, res) => {
     const guestId = req.params.guestId;
     const guest = await getGuest(guestId);
     if (!guest) {
@@ -26,7 +43,8 @@ router.get("/:guestId", async (req, res) => {
     res.status(200).json(guest);
 });
 
-router.patch("/:guestId", async (req, res) => {
+// PROTECTED ENDPOINT - Requires JWT authentication
+router.patch("/:guestId", auth, async (req, res) => {
     const guestId = req.params.guestId;
     const guest = req.body;
     const updatedGuest = await updateGuest(guestId, guest);
@@ -36,7 +54,8 @@ router.patch("/:guestId", async (req, res) => {
     res.status(200).json(updatedGuest);
 });
 
-router.delete("/:guestId", async (req, res) => {
+// PROTECTED ENDPOINT - Requires JWT authentication
+router.delete("/:guestId", auth, async (req, res) => {
     const guestId = req.params.guestId;
     const deletedGuest = await deleteGuest(guestId);
     if (!deletedGuest) {
