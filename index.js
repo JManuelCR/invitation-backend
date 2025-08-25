@@ -22,6 +22,7 @@ mongoose
     server.listen(port, () => {
         console.log(`Servidor corriendo en puerto ${port}`);
         console.log(`WebSocket disponible en ws://localhost:${port}`);
+        console.log(process.env.SECRET_KEY)
     });
 })
 .catch((error) => {
