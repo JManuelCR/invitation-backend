@@ -1,4 +1,4 @@
-# Uso de WebSockets en la API - Solo GET /guests
+# Uso de WebSockets en la API - Eventos de Invitados
 
 ## Configuración del Cliente (Frontend)
 
@@ -24,11 +24,12 @@ socket.on('disconnect', () => {
 });
 ```
 
-### 3. Escuchar Evento Específico de Invitados
+### 3. Escuchar Eventos de Invitados en Tiempo Real
 
-#### Evento ÚNICO - Solo se emite desde GET /guests
+#### Eventos Disponibles
+
 ```javascript
-// Cuando se obtienen todos los invitados (GET /guests)
+// 1. Cuando se obtienen todos los invitados (GET /guests)
 socket.on('guests-fetched', (data) => {
   console.log('Lista de invitados obtenida:', data);
   console.log('Total de invitados:', data.count);
@@ -38,17 +39,51 @@ socket.on('guests-fetched', (data) => {
   updateGuestCount(data.count);
   updateLastFetchTime(data.timestamp);
 });
+
+// 2. Cuando se crea un nuevo invitado (POST /guest)
+socket.on('guest-created', (data) => {
+  console.log('Nuevo invitado creado:', data);
+  console.log('Datos del invitado:', data.guest);
+  console.log('Timestamp:', data.timestamp);
+  
+  // Actualizar tu UI aquí
+  addGuestToList(data.guest);
+  updateGuestCount();
+});
+
+// 3. Cuando se actualiza un invitado (PATCH /guest/:id)
+socket.on('guest-updated', (data) => {
+  console.log('Invitado actualizado:', data);
+  console.log('ID del invitado:', data.guestId);
+  console.log('Datos actualizados:', data.guest);
+  console.log('Timestamp:', data.timestamp);
+  
+  // Actualizar tu UI aquí
+  updateGuestInList(data.guestId, data.guest);
+});
+
+// 4. Cuando se elimina un invitado (DELETE /guest/:id)
+socket.on('guest-deleted', (data) => {
+  console.log('Invitado eliminado:', data);
+  console.log('ID del invitado:', data.guestId);
+  console.log('Timestamp:', data.timestamp);
+  
+  // Actualizar tu UI aquí
+  removeGuestFromList(data.guestId);
+  updateGuestCount();
+});
 ```
 
-## Ejemplo Completo de React - Solo Contador de Invitados
+## Ejemplo Completo de React - Lista de Invitados en Tiempo Real
 
 ```jsx
 import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 
-function GuestCountComponent() {
+function GuestListComponent() {
+  const [guests, setGuests] = useState([]);
   const [guestsCount, setGuestsCount] = useState(0);
-  const [lastFetchTime, setLastFetchTime] = useState(null);
+  const [lastUpdate, setLastUpdate] = useState(null);
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
@@ -56,11 +91,37 @@ function GuestCountComponent() {
     const newSocket = io('http://localhost:3000');
     setSocket(newSocket);
 
-    // Escuchar SOLO el evento de obtener invitados
+    // Escuchar todos los eventos de invitados
     newSocket.on('guests-fetched', (data) => {
       console.log(`Se obtuvieron ${data.count} invitados`);
       setGuestsCount(data.count);
-      setLastFetchTime(data.timestamp);
+      setLastUpdate(data.timestamp);
+    });
+
+    newSocket.on('guest-created', (data) => {
+      console.log('Nuevo invitado creado:', data.guest.guestName);
+      setGuests(prev => [...prev, data.guest]);
+      setGuestsCount(prev => prev + 1);
+      setLastUpdate(data.timestamp);
+    });
+
+    newSocket.on('guest-updated', (data) => {
+      console.log('Invitado actualizado:', data.guest.guestName);
+      setGuests(prev => 
+        prev.map(guest => 
+          guest._id === data.guestId ? data.guest : guest
+        )
+      );
+      setLastUpdate(data.timestamp);
+    });
+
+    newSocket.on('guest-deleted', (data) => {
+      console.log('Invitado eliminado:', data.guestId);
+      setGuests(prev => 
+        prev.filter(guest => guest._id !== data.guestId)
+      );
+      setGuestsCount(prev => prev - 1);
+      setLastUpdate(data.timestamp);
     });
 
     return () => {
@@ -70,19 +131,35 @@ function GuestCountComponent() {
 
   return (
     <div>
-      <h2>Contador de Invitados en Tiempo Real</h2>
-      <p>Total de invitados: <strong>{guestsCount}</strong></p>
-      {lastFetchTime && (
-        <p>Última actualización: {new Date(lastFetchTime).toLocaleString()}</p>
-      )}
+      <h2>Lista de Invitados en Tiempo Real</h2>
+      <div className="stats">
+        <p>Total de invitados: <strong>{guestsCount}</strong></p>
+        {lastUpdate && (
+          <p>Última actualización: {new Date(lastUpdate).toLocaleString()}</p>
+        )}
+      </div>
+      
+      <ul>
+        {guests.map(guest => (
+          <li key={guest._id}>
+            <strong>{guest.guestName}</strong> - {guest.guestType}
+            <span className="status">{guest.guestInvited}</span>
+          </li>
+        ))}
+      </ul>
+      
       <small>
-        Este componente se actualiza automáticamente cuando alguien hace GET /guests
+        Esta lista se actualiza automáticamente cuando:
+        • Se consultan todos los invitados (GET /guests)
+        • Se crea un nuevo invitado (POST /guest)
+        • Se actualiza un invitado (PATCH /guest/:id)
+        • Se elimina un invitado (DELETE /guest/:id)
       </small>
     </div>
   );
 }
 
-export default GuestCountComponent;
+export default GuestListComponent;
 ```
 
 ## Ejemplo de Vanilla JavaScript
@@ -91,17 +168,31 @@ export default GuestCountComponent;
 // Conectar al WebSocket
 const socket = io('http://localhost:3000');
 
-// Escuchar SOLO el evento de obtener invitados
+// Escuchar todos los eventos de invitados
 socket.on('guests-fetched', (data) => {
-  console.log('🎉 Evento emitido desde GET /guests!');
-  console.log(`Se obtuvieron ${data.count} invitados`);
-  
-  // Actualizar tu UI aquí
+  console.log('🎉 Lista de invitados actualizada!');
   updateGuestCount(data.count);
   updateLastFetchTime(data.timestamp);
 });
 
-// Función para actualizar el contador
+socket.on('guest-created', (data) => {
+  console.log('🆕 Nuevo invitado creado:', data.guest.guestName);
+  addGuestToList(data.guest);
+  updateGuestCount();
+});
+
+socket.on('guest-updated', (data) => {
+  console.log('✏️ Invitado actualizado:', data.guest.guestName);
+  updateGuestInList(data.guestId, data.guest);
+});
+
+socket.on('guest-deleted', (data) => {
+  console.log('🗑️ Invitado eliminado:', data.guestId);
+  removeGuestFromList(data.guestId);
+  updateGuestCount();
+});
+
+// Funciones para actualizar la UI
 function updateGuestCount(count) {
   const countElement = document.getElementById('guest-count');
   if (countElement) {
@@ -109,61 +200,92 @@ function updateGuestCount(count) {
   }
 }
 
-// Función para actualizar la última vez
 function updateLastFetchTime(timestamp) {
   const timeElement = document.getElementById('last-fetch-time');
   if (timeElement) {
     timeElement.textContent = new Date(timestamp).toLocaleString();
   }
 }
+
+function addGuestToList(guest) {
+  const listElement = document.getElementById('guest-list');
+  if (listElement) {
+    const li = document.createElement('li');
+    li.innerHTML = `<strong>${guest.guestName}</strong> - ${guest.guestType}`;
+    li.setAttribute('data-guest-id', guest._id);
+    listElement.appendChild(li);
+  }
+}
+
+function updateGuestInList(guestId, updatedGuest) {
+  const guestElement = document.querySelector(`[data-guest-id="${guestId}"]`);
+  if (guestElement) {
+    guestElement.innerHTML = `<strong>${updatedGuest.guestName}</strong> - ${updatedGuest.guestType}`;
+  }
+}
+
+function removeGuestFromList(guestId) {
+  const guestElement = document.querySelector(`[data-guest-id="${guestId}"]`);
+  if (guestElement) {
+    guestElement.remove();
+  }
+}
 ```
 
-## Evento Disponible
+## Eventos Disponibles
 
-### Evento ÚNICO de Invitados
-- **`guests-fetched`** - Se emite SOLO cuando se hace GET /guests
+### Eventos de Invitados
+- **`guests-fetched`** - Se emite cuando se hace GET /guests
   - `action`: "fetched"
   - `count`: número total de invitados
   - `timestamp`: momento exacto de la consulta
 
+- **`guest-created`** - Se emite cuando se hace POST /guest
+  - `action`: "created"
+  - `guest`: objeto completo del invitado creado
+  - `timestamp`: momento exacto de la creación
+
+- **`guest-updated`** - Se emite cuando se hace PATCH /guest/:id
+  - `action`: "updated"
+  - `guestId`: ID del invitado actualizado
+  - `guest`: objeto completo del invitado actualizado
+  - `timestamp`: momento exacto de la actualización
+
+- **`guest-deleted`** - Se emite cuando se hace DELETE /guest/:id
+  - `action`: "deleted"
+  - `guestId`: ID del invitado eliminado
+  - `timestamp`: momento exacto de la eliminación
+
 ## Cómo Funciona
 
 1. **Cliente se conecta** al WebSocket
-2. **Escucha SOLO el evento** `guests-fetched`
-3. **Cuando alguien hace GET /guests** (desde cualquier cliente)
-4. **Se emite automáticamente** el evento `guests-fetched`
+2. **Escucha todos los eventos** de invitados
+3. **Cuando se hace cualquier operación CRUD** (desde cualquier cliente)
+4. **Se emite automáticamente** el evento correspondiente
 5. **Todos los clientes conectados** reciben la notificación
-6. **La UI se actualiza** con el nuevo conteo
+6. **La UI se actualiza** sin necesidad de refrescar
 
 ## Casos de Uso
 
 ### 1. Dashboard en Tiempo Real
-- Mostrar contador de invitados siempre actualizado
-- Ver cuándo fue la última consulta
-- No necesitas refrescar la página
+- Ver cambios de invitados inmediatamente
+- Contador siempre actualizado
+- Lista sincronizada entre múltiples pantallas
 
-### 2. Notificaciones
-- Saber cuándo alguien consulta la lista
-- Mantener estadísticas actualizadas
-- Sincronización entre múltiples pantallas
+### 2. Aplicación Móvil
+- Notificaciones push para cambios
+- Sincronización automática
+- Experiencia fluida sin refrescar
 
-### 3. Auditoría
-- Rastrear cuándo se consultan los invitados
-- Mantener logs de actividad
-- Monitoreo de uso del sistema
+### 3. Panel de Administración
+- Ver cambios en tiempo real
+- Auditoría de operaciones
+- Monitoreo de actividad
 
 ## Ventajas de esta Implementación
 
-1. **Específica**: Solo afecta al endpoint que quieres
-2. **Ligera**: No interfiere con otros endpoints
+1. **Tiempo Real**: Los cambios se reflejan inmediatamente
+2. **Completa**: Cubre todas las operaciones CRUD
 3. **Eficiente**: Solo emite cuando es necesario
-4. **Simple**: Fácil de implementar y mantener
-5. **Focalizada**: Solo para el caso de uso que necesitas
-
-## Configuración del Servidor
-
-El servidor está configurado para:
-- Aceptar conexiones WebSocket
-- Emitir SOLO el evento `guests-fetched` cuando se hace GET /guests
-- NO interferir con otros endpoints
-- Mantener el funcionamiento original de todas las demás rutas 
+4. **Consistente**: Misma estructura de datos para todos los eventos
+5. **Escalable**: Funciona con múltiples clientes conectados 
