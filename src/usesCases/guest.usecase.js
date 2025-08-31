@@ -14,7 +14,9 @@ const getGuest = async (guestId) => {
         guestInvitationId: guest.guestInvitationId,
         guestlanguage: guest.guestlanguage,
         guestInvitationResponse: guest.guestInvitationResponse,
-        guestPassesNumberToRecibe: guest.guestPassesNumberToRecibe
+        guestPassesNumberToRecibe: guest.guestPassesNumberToRecibe,
+        guestChurchAssistantConfirmation: guest.guestChurchAssistantConfirmation,
+        guestReceptionAssistantConfirmation: guest.guestReceptionAssistantConfirmation,
     }
     return partialGuestWerd;
 }
