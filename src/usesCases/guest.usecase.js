@@ -12,7 +12,7 @@ const getGuest = async (guestId) => {
         guestName: guest.guestName,
         guestInvitationDelivered: guest.guestInvitationDelivered,
         guestInvitationId: guest.guestInvitationId,
-        guestlanguage: guest.guestlanguage,
+        guestLanguage: guest.guestLanguage,
         guestInvitationResponse: guest.guestInvitationResponse,
         guestPassesNumberToRecibe: guest.guestPassesNumberToRecibe,
         guestChurchAssistantConfirmation: guest.guestChurchAssistantConfirmation,
