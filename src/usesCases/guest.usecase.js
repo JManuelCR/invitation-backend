@@ -8,7 +8,15 @@ const createGuest = async (guest) => {
 
 const getGuest = async (guestId) => {
     const guest = await Guest.findOne({ guestInvitationId: guestId });
-    return guest;
+    const partialGuestWerd = {
+        guestName: guest.guestName,
+        guestInvitationDelivered: guest.guestInvitationDelivered,
+        guestInvitationId: guest.guestInvitationId,
+        guestlanguage: guest.guestlanguage,
+        guestInvitationResponse: guest.guestInvitationResponse,
+        guestPassesNumberToRecibe: guest.guestPassesNumberToRecibe
+    }
+    return partialGuestWerd;
 }
 
 const getAllGuests = async () => {
