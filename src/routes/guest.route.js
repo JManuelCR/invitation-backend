@@ -33,8 +33,8 @@ router.post("/", auth, async (req, res) => {
         }
         
         // Emitir evento cuando se crea un nuevo invitado
-        emitToAll('guest-created', {
-            action: 'created',
+        emitToAll('guest-added', {
+            action: 'added',
             guest: newGuest,
             timestamp: new Date().toISOString()
         });
@@ -95,8 +95,8 @@ router.delete("/:guestId", auth, async (req, res) => {
         }
         
         // Emitir evento cuando se elimina un invitado
-        emitToAll('guest-deleted', {
-            action: 'deleted',
+        emitToAll('guest-removed', {
+            action: 'removed',
             guestId: guestId,
             timestamp: new Date().toISOString()
         });
